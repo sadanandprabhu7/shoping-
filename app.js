@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 
 const errorController = require('./controllers/error');
 
-const db = require('./util/database')
+const sequelize = require('./util/database')
 
 const app = express();
 
@@ -24,4 +24,16 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-app.listen(3000);
+
+// to create by defaul table products using sequelize
+// if present, not overwrite , if not present make one by defaults gives name procducts because we defined objec as product
+// and then start server 
+sequelize.sync().then(result =>{
+    //console.log(result);
+    app.listen(3000);
+
+}).catch(err=>{
+    console.log(err);
+})
+
+
