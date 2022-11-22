@@ -8,6 +8,8 @@ const errorController = require('./controllers/error');
 const sequelize = require('./util/database')
 const Product = require('./models/product')
 const User = require('./models/user')
+const Cart = require('./models/cart')
+const CartItems = require('./models/cart-item')
 
 const app = express();
 
@@ -36,14 +38,20 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
+
+
 /// here we have defined realtion in database between these two models
 Product.belongsTo(User,{constraints:true,onDelete:'CASCADE'})// IF USER IS DELETE ALL PRODUCTS RELETED TO IT IS DELETED
 User.hasMany(Product);
 // to create by defaul table products using sequelize
 // if present, not overwrite , if not present make one by defaults gives name procducts because we defined objec as product
 // and then start server 
+User.hasOne(Cart) // user has one cart
+Cart.belongsTo(User)// same thing cart as above user have one cart
+Cart.belongsToMany(Product,{through:CartItems})
+Product.belongsToMany(Cart,{through:CartItems})
 sequelize
-// .sync({force:true})
+//.sync({force:true})
 .sync()
 .then(result =>{
 
@@ -60,7 +68,10 @@ sequelize
 })
 .then(user=>{
     //console.log(user)
-
+    return user.createCart();
+   
+})
+.then(cart=>{
     app.listen(3000);
 })
 .catch(err=>{
