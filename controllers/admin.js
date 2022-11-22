@@ -15,14 +15,16 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product(null, title, imageUrl, description, price);
+ // const product = new Product(null, title, imageUrl, description, price);
 //***** start using sequelize */
-Product.create({
+req.user
+.createProduct({
   title:title,
   price:price,
   imageUrl:imageUrl,
   description:description
-}).then(result=>{
+})
+.then(result=>{
   res.redirect('/admin/products');
   console.log('product created');
 }).catch(err=>{
@@ -48,7 +50,11 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  Product.findByPk(prodId).then(product=>{
+  req.user
+  .getProducts({where:{id:prodId}})
+  //Product.findByPk(prodId)
+  .then(products=>{
+    const product =products[0]
     if (!product) {
       return res.redirect('/');
     }
@@ -91,7 +97,9 @@ exports.postEditProduct = (req, res, next) => {
 /// this is for admin page Admin products
 // to show products with delete and edit button
 exports.getProducts = (req, res, next) => {
-  Product.findAll().then((products)=>{
+req.user
+.getProducts()
+  .then((products)=>{
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
